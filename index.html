@@ -2,30 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Plinko Live</title>
+  <title>Plinko Live — Free Online Plinko Game with Auto Play</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- SEO basics -->
+  <meta name="description"
+        content="Play a free Plinko game online with visible pegs, realistic physics-like drops, risk levels and auto play. No registration, no download — just launch Plinko Live in your browser." />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://plinko-live.github.io/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Plinko Live — Free Online Plinko Game with Auto Play" />
+  <meta property="og:description"
+        content="Enjoy a free Plinko game in your browser. Choose risk, set your bet, watch the ball bounce on pegs and land in multiplier slots. Includes auto play and mobile support." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://plinko-live.github.io/" />
+
+  <!-- Twitter cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Plinko Live — Free Online Plinko Game" />
+  <meta name="twitter:description"
+        content="Free online Plinko game with visible pegs, risk levels and auto mode. Runs directly in your browser." />
+
   <link rel="stylesheet" href="styles.css" />
-  <meta name="description" content="Plinko-style browser game with visible pegs, physics-like path and auto play.">
 </head>
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <div class="logo">Plinko Live</div>
-      <nav class="main-nav">
+      <div class="logo" aria-label="Plinko Live homepage">
+        Plinko Live
+      </div>
+      <nav class="main-nav" aria-label="Main navigation">
         <a href="#game">Game</a>
-        <a href="#about">How it works</a>
+        <a href="#how-to-play">How to play</a>
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
       </nav>
     </div>
   </header>
 
   <main class="site-main">
-    <section id="game" class="game-section">
+    <!-- HERO + GAME -->
+    <section id="game" class="game-section" aria-labelledby="game-title">
       <div class="container game-layout">
         <div class="game-panel">
-          <h1 class="game-title">Plinko Live Demo</h1>
+          <h1 id="game-title" class="game-title">
+            Plinko Live — Free Browser Plinko Game
+          </h1>
           <p class="game-subtitle">
-            Choose risk, set your bet and drop the ball. It bounces on visible pegs
-            and lands in one of the multiplier slots.
+            Play a simple Plinko game online: choose risk, set your bet and drop the ball.
+            It bounces on visible pegs and lands in one of the multiplier slots at the bottom.
           </p>
 
           <div class="controls">
@@ -59,40 +87,166 @@
 
           <div class="result" id="resultText">Press "Drop ball" to start.</div>
 
-          <div class="plinko-board" id="plinkoBoard">
-            <div class="pegs-layer" id="pegsLayer"></div>
+          <div class="plinko-board" id="plinkoBoard" aria-label="Plinko board">
+            <div class="pegs-layer" id="pegsLayer" aria-hidden="true"></div>
             <div class="slots-row" id="slotsRow">
-              <!-- slots will be injected via JS -->
+              <!-- slots are injected via JS -->
             </div>
             <div class="ball" id="ball"></div>
           </div>
 
           <div class="multipliers" id="multipliersRow">
-            <!-- multipliers will be injected via JS -->
+            <!-- multipliers are injected via JS -->
           </div>
         </div>
       </div>
     </section>
 
-    <section id="about" class="info-section">
+    <!-- WHAT IS PLINKO -->
+    <section id="intro" class="info-section">
       <div class="container">
-        <h2>How this Plinko demo works</h2>
+        <h2>What is Plinko and how does this online version work?</h2>
         <p>
-          The game uses a fixed number of rows (<strong>10</strong>). On every row the ball
-          randomly goes left or right, bouncing on pegs. After the last row it lands in
-          one of the slots at the bottom.
-        </p>
-        <p>
-          Risk changes multipliers per slot: low risk is smoother and closer to break-even,
-          high risk adds huge edge multipliers but with more low hits in the middle.
+          Plinko is a simple game where a ball drops from the top of a board filled with pegs.
+          On every row the ball randomly moves left or right, eventually landing in one of the
+          slots with different multipliers. Central slots usually hit more often, while edge
+          slots can have much higher payouts.
         </p>
         <p>
-          Auto play repeats drops one by one until you stop it or run out of balance.
+          Plinko Live is a lightweight browser version of this idea. The game runs entirely in
+          HTML, CSS and JavaScript and does not require registration, downloads or plugins.
+          You can open it in a desktop or mobile browser and experiment with different risk
+          levels and bet sizes.
         </p>
-        <p class="disclaimer">
-          This demo is for educational and entertainment purposes only and does not represent
-          a real-money gambling product.
+      </div>
+    </section>
+
+    <!-- HOW TO PLAY -->
+    <section id="how-to-play" class="info-section">
+      <div class="container">
+        <h2>How to play Plinko Live online</h2>
+        <p>
+          You only need a browser to start playing. Follow these simple steps:
         </p>
+        <ol>
+          <li><strong>Set your bet amount.</strong> Enter the stake in the field above the board.</li>
+          <li>
+            <strong>Choose a risk level.</strong>
+            Low risk keeps multipliers closer together, while high risk adds big edge values but
+            more low outcomes overall.
+          </li>
+          <li>
+            <strong>Drop a single ball.</strong> Click <em>“Drop ball”</em> to launch one round and
+            see where it lands.
+          </li>
+          <li>
+            <strong>Use auto play (optional).</strong> Click <em>“Start auto”</em> to keep dropping
+            balls automatically one by one until you stop or run out of balance.
+          </li>
+          <li>
+            <strong>Adjust and experiment.</strong> Change risk and bet size to see how your
+            long-term result is affected.
+          </li>
+        </ol>
+        <p>
+          The balance displayed above the board helps you track how much you would hypothetically
+          gain or lose over a series of rounds. It is only a simulation and does not involve
+          real-money transactions.
+        </p>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="info-section">
+      <div class="container">
+        <h2>Key features of this free Plinko game</h2>
+        <ul>
+          <li><strong>Visible pegs and physics-like path.</strong> The ball moves row by row and visibly bounces through the grid.</li>
+          <li><strong>Multiple risk levels.</strong> Switch between low, medium and high risk to change multiplier layout.</li>
+          <li><strong>Auto play mode.</strong> Let the game drop balls for you in a loop and watch the balance graph mentally.</li>
+          <li><strong>Browser-only implementation.</strong> Pure HTML, CSS and JavaScript, hosted on GitHub Pages.</li>
+          <li><strong>Mobile-friendly layout.</strong> The board and controls adapt to smaller screens.</li>
+          <li><strong>No sign-up or tracking.</strong> It is an open demo focused on learning and entertainment.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STRATEGY / TIPS -->
+    <section id="strategy" class="info-section">
+      <div class="container">
+        <h2>Basic Plinko strategies and tips</h2>
+        <p>
+          Plinko is still a random game, but a few simple ideas make testing strategies more
+          meaningful:
+        </p>
+        <ul>
+          <li>
+            <strong>Think in series, not single spins.</strong> Any one drop can hit an edge slot,
+            but long-term results are shaped by the risk level you use.
+          </li>
+          <li>
+            <strong>Use smaller bets for high risk.</strong> High risk layouts have attractive
+            multipliers on the sides, but most hits still land near the middle.
+          </li>
+          <li>
+            <strong>Compare risk levels.</strong> Run a short auto session on each risk level to
+            see how quickly the balance goes up or down.
+          </li>
+          <li>
+            <strong>Set a virtual loss limit.</strong> Even in a demo it is useful to decide in
+            advance when you want to stop.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="info-section">
+      <div class="container">
+        <h2>Plinko Live FAQ</h2>
+        <div class="faq-list">
+          <article class="faq-item">
+            <h3>Is this Plinko game free to play?</h3>
+            <p>
+              Yes. Plinko Live runs entirely in your browser and is free to use. The balance and
+              bets you see on screen are virtual and used only for simulation.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Do I need to register or create an account?</h3>
+            <p>
+              No registration or sign-up is required. Open the page, set your bet and start dropping
+              balls right away.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>How are the multipliers and outcomes calculated?</h3>
+            <p>
+              The ball moves row by row through a grid of pegs. On every row it randomly goes left
+              or right, which produces a binomial-like distribution — central slots are more likely
+              than edge slots. Multipliers depend on the chosen risk level.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Does this game use real-money gambling mechanics?</h3>
+            <p>
+              No. This is a standalone demo. It does not connect to any casino, does not accept
+              deposits and does not pay out winnings. It is intended for educational and
+              entertainment use only.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Can I use this Plinko board in my own project?</h3>
+            <p>
+              The game is built with plain HTML, CSS and JavaScript, so you can study the code
+              and adapt the idea for your own experiments or learning projects.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
   </main>
@@ -100,9 +254,59 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>© <span id="year"></span> Plinko Live Demo</span>
-      <span>Hosted on GitHub Pages</span>
+      <span>Free browser Plinko game on GitHub Pages</span>
     </div>
   </footer>
+
+  <!-- FAQ structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is this Plinko game free to play?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Plinko Live runs entirely in your browser and is free to use. The balance and bets you see on screen are virtual and used only for simulation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to register or create an account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No registration or sign-up is required. Open the page, set your bet and start dropping balls right away."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How are the multipliers and outcomes calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The ball moves row by row through a grid of pegs. On every row it randomly goes left or right, which produces a binomial-like distribution where central slots are more likely than edge slots. Multipliers depend on the chosen risk level."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this game use real-money gambling mechanics?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. This is a standalone demo. It does not connect to any casino, does not accept deposits and does not pay out winnings. It is intended for educational and entertainment use only."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this Plinko board in my own project?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The game is built with plain HTML, CSS and JavaScript, so you can study the code and adapt the idea for your own experiments or learning projects."
+        }
+      }
+    ]
+  }
+  </script>
 
   <script src="game.js" defer></script>
 </body>
