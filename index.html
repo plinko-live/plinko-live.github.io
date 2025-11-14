@@ -5,7 +5,7 @@
   <title>Plinko Live</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css" />
-  <meta name="description" content="Simple Plinko-style game in your browser. Drop the ball, watch it bounce and see your winnings.">
+  <meta name="description" content="Plinko-style browser game with risk levels and realistic odds, built with HTML, CSS and JavaScript.">
 </head>
 <body>
   <header class="site-header">
@@ -24,7 +24,7 @@
         <div class="game-panel">
           <h1 class="game-title">Plinko Live Demo</h1>
           <p class="game-subtitle">
-            Set your bet, drop the ball and see in which slot it lands.
+            Choose risk level, set your bet and drop the ball. Payouts are based on a Plinko-style binomial distribution.
           </p>
 
           <div class="controls">
@@ -32,10 +32,26 @@
               <label for="bet">Bet amount</label>
               <input type="number" id="bet" value="10" min="1" step="1" />
             </div>
+
             <div class="control-group">
-              <span>Balance:</span>
-              <span id="balance">1000</span>
+              <label for="risk">Risk</label>
+              <select id="risk">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+              </select>
             </div>
+
+            <div class="control-group">
+              <span>Rows</span>
+              <span id="rowsLabel">10</span>
+            </div>
+
+            <div class="control-group">
+              <span>Balance</span>
+              <span id="balance">1000.00</span>
+            </div>
+
             <button id="dropBtn" class="btn-primary">Drop ball</button>
           </div>
 
@@ -43,13 +59,13 @@
 
           <div class="plinko-board" id="plinkoBoard">
             <div class="slots-row" id="slotsRow">
-              <!-- слоты создадим в JS, чтобы не дублировать разметку -->
+              <!-- slots will be injected via JS -->
             </div>
             <div class="ball" id="ball"></div>
           </div>
 
           <div class="multipliers" id="multipliersRow">
-            <!-- подписи множителей тоже создадим в JS -->
+            <!-- multipliers will be injected via JS -->
           </div>
         </div>
       </div>
@@ -59,17 +75,17 @@
       <div class="container">
         <h2>How this Plinko demo works</h2>
         <p>
-          This is a simplified browser version of a Plinko-style game. Each slot at the
-          bottom has its own multiplier. When you press the button, the ball drops into a
-          random slot, and your potential win is calculated as <strong>bet × multiplier</strong>.
+          The game uses a fixed number of rows (<strong>10</strong>) and a set of multipliers for each bin, based on the
+          selected risk level. When you drop the ball, the outcome is drawn according to a
+          <strong>binomial probability distribution</strong> – central bins are more likely than the edges.
         </p>
         <p>
-          The goal of this demo is to show how a basic game can be built with plain HTML,
-          CSS and JavaScript and hosted on GitHub Pages without any backend.
+          Risk level changes the multipliers: low risk gives smoother, more stable payouts; high risk creates huge
+          multipliers on the edges but most hits will be in low or medium bins.
         </p>
         <p class="disclaimer">
-          This demo is for educational purposes only and does not represent a real-money
-          gambling product.
+          This demo is for educational and entertainment purposes only and does not represent a real-money gambling
+          product.
         </p>
       </div>
     </section>
