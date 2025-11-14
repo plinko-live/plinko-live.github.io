@@ -120,17 +120,20 @@ body {
   color: var(--text-muted);
 }
 
-.control-group input[type="number"] {
+.control-group input[type="number"],
+.control-group select {
   margin-top: 4px;
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #020617;
   color: var(--text);
-  width: 120px;
+  min-width: 110px;
+  font-size: 13px;
 }
 
 .control-group span:last-child {
+  margin-top: 4px;
   font-weight: 600;
   color: var(--text);
 }
@@ -234,7 +237,7 @@ body {
   top: -24px;
   left: 50%;
   transform: translateX(-50%);
-  transition: top 0.9s ease-out, left 0.9s ease-in-out;
+  transition: top 0.9s ease-out, left 0.9s ease-in-out, transform 0.9s ease-in-out;
 }
 
 /* multipliers row */
