@@ -5,7 +5,7 @@
   <title>Plinko Live</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="styles.css" />
-  <meta name="description" content="Plinko-style browser game with risk levels and realistic odds, built with HTML, CSS and JavaScript.">
+  <meta name="description" content="Plinko-style browser game with visible pegs, physics-like path and auto play.">
 </head>
 <body>
   <header class="site-header">
@@ -24,7 +24,8 @@
         <div class="game-panel">
           <h1 class="game-title">Plinko Live Demo</h1>
           <p class="game-subtitle">
-            Choose risk level, set your bet and drop the ball. Payouts are based on a Plinko-style binomial distribution.
+            Choose risk, set your bet and drop the ball. It bounces on visible pegs
+            and lands in one of the multiplier slots.
           </p>
 
           <div class="controls">
@@ -53,11 +54,13 @@
             </div>
 
             <button id="dropBtn" class="btn-primary">Drop ball</button>
+            <button id="autoBtn" class="btn-secondary">Start auto</button>
           </div>
 
           <div class="result" id="resultText">Press "Drop ball" to start.</div>
 
           <div class="plinko-board" id="plinkoBoard">
+            <div class="pegs-layer" id="pegsLayer"></div>
             <div class="slots-row" id="slotsRow">
               <!-- slots will be injected via JS -->
             </div>
@@ -75,17 +78,20 @@
       <div class="container">
         <h2>How this Plinko demo works</h2>
         <p>
-          The game uses a fixed number of rows (<strong>10</strong>) and a set of multipliers for each bin, based on the
-          selected risk level. When you drop the ball, the outcome is drawn according to a
-          <strong>binomial probability distribution</strong> – central bins are more likely than the edges.
+          The game uses a fixed number of rows (<strong>10</strong>). On every row the ball
+          randomly goes left or right, bouncing on pegs. After the last row it lands in
+          one of the slots at the bottom.
         </p>
         <p>
-          Risk level changes the multipliers: low risk gives smoother, more stable payouts; high risk creates huge
-          multipliers on the edges but most hits will be in low or medium bins.
+          Risk changes multipliers per slot: low risk is smoother and closer to break-even,
+          high risk adds huge edge multipliers but with more low hits in the middle.
+        </p>
+        <p>
+          Auto play repeats drops one by one until you stop it or run out of balance.
         </p>
         <p class="disclaimer">
-          This demo is for educational and entertainment purposes only and does not represent a real-money gambling
-          product.
+          This demo is for educational and entertainment purposes only and does not represent
+          a real-money gambling product.
         </p>
       </div>
     </section>
