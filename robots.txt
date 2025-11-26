@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://plinko-live.github.io/sitemap.xml
