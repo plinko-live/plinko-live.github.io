@@ -520,3 +520,33 @@ body {
   width: 100%;
   height: auto;
 }
+#multipliersRow {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+#multipliersRow .multiplier-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.2;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: #e5e7eb;
+}
+
+#multipliersRow .multiplier-chip.edge {
+  background: #be123c;
+}
+
+#multipliersRow .multiplier-chip.center {
+  background: #facc15;
+  color: #111827;
+}
