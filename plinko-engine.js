@@ -158,6 +158,7 @@
       Composite.add(this.world, this.buckets);
 
       // Collision / update logic: check when ball falls below bucket line
+      const finishLineY = H - 10; // чуть выше пола
       Events.on(this.engine, 'afterUpdate', () => {
         if (!this.ball || !this.isDropping) return;
 
