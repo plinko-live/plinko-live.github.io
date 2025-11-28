@@ -47,7 +47,9 @@
     <!-- HERO + GAME -->
     <section id="game" class="game-section" aria-labelledby="game-title">
       <div class="container game-layout">
-        <div class="game-panel">
+        <!-- MAIN GAME CARD -->
+        <section class="game-panel">
+          <span class="kicker">Demo • Plinko Game</span>
           <h1 id="game-title" class="game-title">
             Plinko Live — Free Browser Plinko Game
           </h1>
@@ -98,7 +100,36 @@
           <div class="multipliers" id="multipliersRow">
             <!-- multipliers are injected via JS -->
           </div>
-        </div>
+        </section>
+
+        <!-- SIDE INFO PANEL (как у Crash/Coinflip) -->
+        <aside class="game-aside" aria-label="Plinko demo information">
+          <div class="info-card">
+            <h2>What this Plinko demo shows</h2>
+            <ul>
+              <li>Classic Plinko board with visible pegs and realistic, step-by-step drops.</li>
+              <li>Three risk levels that change the multiplier layout from conservative to volatile.</li>
+              <li>Auto play mode to watch how your virtual balance behaves over many rounds.</li>
+            </ul>
+            <p>
+              Everything runs on <strong>virtual credits only</strong>. You can safely test ideas,
+              compare risk levels and see how often edge slots actually hit.
+            </p>
+          </div>
+
+          <div class="info-card">
+            <h3>Quick facts</h3>
+            <ul>
+              <li>Rows: <strong>10</strong> (11 final slots).</li>
+              <li>Risk: <strong>low / medium / high</strong> with different multiplier sets.</li>
+              <li>Auto: drops balls one by one until you stop or balance reaches 0.</li>
+              <li>Tech: pure HTML, CSS and JavaScript hosted on GitHub Pages.</li>
+            </ul>
+            <p class="info-disclaimer">
+              This is not a real-money gambling product and is not linked to any casino.
+            </p>
+          </div>
+        </aside>
       </div>
     </section>
 
