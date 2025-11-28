@@ -490,3 +490,33 @@ body {
     align-items: flex-start;
   }
 }
+
+/* === Plinko layout overrides === */
+.game-layout {
+  display: block; /* панель + инфа в одну колонку, панель на всю ширину */
+}
+
+.game-panel {
+  max-width: 100%;
+}
+
+/* широкая доска + растянуть canvas */
+.plinko-board {
+  position: relative;
+  margin: 12px 0 10px;
+  width: 100%;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 18px;
+  padding: 18px 16px 18px;
+  background: radial-gradient(circle at top, #111827 0, #020617 60%);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.plinko-board canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
