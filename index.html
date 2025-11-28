@@ -89,17 +89,17 @@
 
           <div class="result" id="resultText">Press "Drop ball" to start.</div>
 
-          <div class="plinko-board" id="plinkoBoard" aria-label="Plinko board">
-            <div class="pegs-layer" id="pegsLayer" aria-hidden="true"></div>
-            <div class="slots-row" id="slotsRow">
-              <!-- slots are injected via JS -->
-            </div>
-            <div class="ball" id="ball"></div>
-          </div>
+          <div class="plinko-board">
+  <canvas
+    id="plinkoCanvas"
+    width="420"
+    height="530"
+    aria-label="Plinko board"
+  ></canvas>
+</div>
 
-          <div class="multipliers" id="multipliersRow">
-            <!-- multipliers are injected via JS -->
-          </div>
+<div class="multipliers" id="multipliersRow"></div>
+
         </section>
 
         <!-- SIDE INFO PANEL (как у Crash/Coinflip) -->
@@ -338,6 +338,7 @@
   }
   </script>
 
-  <script src="game.js" defer></script>
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+  <script src="plinko-engine.js"></script>
+  <script src="game.js"></script></body>
 </html>
