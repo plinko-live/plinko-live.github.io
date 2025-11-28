@@ -221,12 +221,12 @@ body {
   position: relative;
   margin: 8px 0 10px;
   width: 100%;
-  max-width: 440px;
-  height: 320px;
+  max-width: 720px;       /* было 440px */
+  height: 420px;          /* было 320px */
   margin-left: auto;
   margin-right: auto;
   border-radius: 18px;
-  padding: 14px 12px 46px;
+  padding: 18px 16px 56px; /* чуть больше паддинги, чтобы всё влезло */
   background:
     radial-gradient(circle at top, #1f2937 0, #020617 65%),
     radial-gradient(circle at bottom, #0f172a 0, #020617 70%);
@@ -482,7 +482,7 @@ body {
 
   .plinko-board {
     max-width: 100%;
-    height: 280px;
+    height: 360px; /* было 280px */
   }
 
   .footer-inner {
