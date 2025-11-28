@@ -1,21 +1,3 @@
-// plinko-engine.js
-// Plinko physics engine + simple UI wrapper for Plinko Live demo.
-// Uses Matter.js for physics and canvas rendering.
-// No external dependencies besides Matter.js.
-//
-// Страница должна содержать:
-// - <canvas id="plinkoCanvas" width="600" height="420"></canvas>
-// - input#bet (type="number")
-// - select#risk (low / medium / high)
-// - select#rows (например 10 и 16)
-// - span#rowsLabel (выводит текущее количество рядов)
-// - span#balance
-// - button#dropBtn
-// - button#autoBtn
-// - div#resultText
-// - div#multipliersRow
-// - span#year (опционально)
-
 (function (global) {
   'use strict';
 
@@ -25,16 +7,14 @@
   var Runner = Matter.Runner;
   var Composite = Matter.Composite;
   var Bodies = Matter.Bodies;
+  var Body = Matter.Body;
   var Events = Matter.Events;
 
   if (!Engine || !Render) {
     console.warn('[PlinkoEngine] Matter.js not found. Include matter.min.js before this file.');
   }
 
-  // ---------------------------------------------------------------------------
-  // ЧИСТЫЙ ДВИЖОК ПЛИНКО
-  // ---------------------------------------------------------------------------
-
+  // --------- КЛАСС ДВИЖКА ---------
   function PlinkoEngine(canvas, options) {
     if (!canvas) throw new Error('PlinkoEngine requires a canvas element');
     if (!Engine) throw new Error('PlinkoEngine requires Matter.js');
@@ -70,8 +50,8 @@
   PlinkoEngine.WIDTH = 600;
   PlinkoEngine.HEIGHT = 420;
 
+  // запасной набор множителей, если не передали свои
   function defaultMultipliers(count) {
-    // Симметричный профиль: центр ~1x, края выше
     var mid = (count - 1) / 2;
     var arr = [];
     for (var i = 0; i < count; i++) {
@@ -82,31 +62,36 @@
     return arr;
   }
 
+  // построение сцены: треугольная сетка пинов + «коробки» слотов
   PlinkoEngine.prototype._setupScene = function () {
     var W = PlinkoEngine.WIDTH;
     var H = PlinkoEngine.HEIGHT;
     var wallThickness = 40;
 
-    // Статичные границы
+    // стенки и пол
     var leftWall = Bodies.rectangle(-wallThickness / 2, H / 2, wallThickness, H, { isStatic: true });
     var rightWall = Bodies.rectangle(W + wallThickness / 2, H / 2, wallThickness, H, { isStatic: true });
     var floor = Bodies.rectangle(W / 2, H + wallThickness / 2, W, wallThickness, { isStatic: true });
 
     Composite.add(this.world, [leftWall, rightWall, floor]);
 
-    // Сетка пинов — классический треугольник
+    // геометрия сетки пинов
     var topOffsetY = 40;
-    var bottomOffsetY = 100;
+    var bottomOffsetY = 90;
     var usableHeight = H - topOffsetY - bottomOffsetY;
     var rowSpacing = usableHeight / this.rows;
     var pegRadius = 4;
 
+    var centerX = W / 2;
+    var baseStepX = W / (this.rows + 1); // горизонтальный шаг
+
+    // треугольная (пирамидальная) сетка
     for (var row = 0; row < this.rows; row++) {
-      var y = topOffsetY + row * rowSpacing;
+      var y = topOffsetY + (row + 1) * rowSpacing;
       var cols = row + 1;
-      var spacing = W / (cols + 1);
       for (var col = 0; col < cols; col++) {
-        var x = spacing * (col + 1);
+        var offsetFromCenter = (col - row / 2) * baseStepX;
+        var x = centerX + offsetFromCenter;
         var peg = Bodies.circle(x, y, pegRadius, {
           isStatic: true,
           restitution: 0.3,
@@ -117,13 +102,13 @@
     }
     Composite.add(this.world, this.pegs);
 
-    // Слоты внизу
+    // слоты (коробки внизу)
     var bucketsY = H - 40;
     var slotWidth = W / this.slotsCount;
     var bucketHeight = 60;
-    var i, bucket, bx;
+    var bucket, bx;
 
-    for (i = 0; i < this.slotsCount; i++) {
+    for (var i = 0; i < this.slotsCount; i++) {
       bx = slotWidth * (i + 0.5);
       bucket = Bodies.rectangle(bx, bucketsY, slotWidth, bucketHeight, {
         isStatic: true,
@@ -141,7 +126,7 @@
 
     var self = this;
 
-    // Ключевой фикс: считаем раунд законченным, когда шар СТОЛКНУЛСЯ с любым слотом
+    // когда шарик сталкивается с одной из коробок — раунд закончен
     Events.on(this.engine, 'collisionStart', function (event) {
       if (!self.ball || !self.isDropping) return;
 
@@ -151,18 +136,15 @@
         var a = pair.bodyA;
         var b = pair.bodyB;
 
-        var ballBody = null;
         var bucketBody = null;
 
         if (a === self.ball && self.buckets.indexOf(b) !== -1) {
-          ballBody = a;
           bucketBody = b;
         } else if (b === self.ball && self.buckets.indexOf(a) !== -1) {
-          ballBody = b;
           bucketBody = a;
         }
 
-        if (ballBody && bucketBody && self.isDropping) {
+        if (bucketBody) {
           self._finishDrop(bucketBody.slotIndex);
           break;
         }
@@ -205,13 +187,17 @@
     this._clearBall();
   };
 
+  // запуск шарика
   PlinkoEngine.prototype.dropBall = function (onResult) {
     if (this.isDropping) return;
     this.onResultCallback = typeof onResult === 'function' ? onResult : null;
 
     this._clearBall();
 
-    var startX = PlinkoEngine.WIDTH / 2;
+    var slotWidth = PlinkoEngine.WIDTH / this.slotsCount;
+    // Рандомный сдвиг по X, чтобы путь не был одинаковым
+    var randomOffset = (Math.random() - 0.5) * slotWidth * 0.7;
+    var startX = PlinkoEngine.WIDTH / 2 + randomOffset;
     var startY = 20;
     var radius = 10;
 
@@ -221,6 +207,10 @@
       frictionAir: 0.005,
       render: { fillStyle: '#22D3EE' }
     });
+
+    // небольшой случайный начальный «пинок» по X
+    var randomVX = (Math.random() - 0.5) * 2;
+    Body.setVelocity(this.ball, { x: randomVX, y: 0 });
 
     Composite.add(this.world, this.ball);
     this.isDropping = true;
@@ -237,15 +227,11 @@
   PlinkoEngine.prototype._finishDrop = function (slotIndexFromBucket) {
     if (!this.isDropping) return;
 
-    var slotIndex = slotIndexFromBucket;
-    if (typeof slotIndex !== 'number') {
-      // запасной вариант — считаем по X-координате
-      var pos = this.ball ? this.ball.position : { x: PlinkoEngine.WIDTH / 2 };
-      var slotWidth = PlinkoEngine.WIDTH / this.slotsCount;
-      slotIndex = Math.floor(pos.x / slotWidth);
-      if (slotIndex < 0) slotIndex = 0;
-      if (slotIndex >= this.slotsCount) slotIndex = this.slotsCount - 1;
-    }
+    var slotIndex =
+      typeof slotIndexFromBucket === 'number' ? slotIndexFromBucket : 0;
+
+    if (slotIndex < 0) slotIndex = 0;
+    if (slotIndex >= this.slotsCount) slotIndex = this.slotsCount - 1;
 
     var multiplier = this.multipliers[slotIndex] || 0;
     var payload = { slotIndex: slotIndex, multiplier: multiplier };
@@ -259,9 +245,7 @@
 
   global.PlinkoEngine = PlinkoEngine;
 
-  // ---------------------------------------------------------------------------
-  // UI-ОБВЯЗКА ДЛЯ ТЕКУЩЕЙ СТРАНИЦЫ PLINKO LIVE
-  // ---------------------------------------------------------------------------
+  // --------- ПРОСТАЯ UI-ОБВЁРТКА ---------
   if (typeof document !== 'undefined') {
     document.addEventListener('DOMContentLoaded', function () {
       if (!global.PlinkoEngine || !global.Matter) return;
@@ -278,9 +262,11 @@
       var multipliersRow = document.getElementById('multipliersRow');
       var yearEl         = document.getElementById('year');
 
-      if (!canvas || !betInput || !riskSelect ||
-          !balanceEl || !dropBtn || !autoBtn ||
-          !resultText || !multipliersRow) {
+      if (
+        !canvas || !betInput || !riskSelect ||
+        !balanceEl || !dropBtn || !autoBtn ||
+        !resultText || !multipliersRow
+      ) {
         return;
       }
 
@@ -288,13 +274,10 @@
         yearEl.textContent = String(new Date().getFullYear());
       }
 
-      // Мультипликаторы, близкие к оригиналу.
-      // Medium / 16 rows — точно как на скрине:
-      // 110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110
+      // табличка множителей: точные для 10 и 16, остальные — генерация по профилю
       var MULTIPLIERS = {
         low: {
-          10: [5.6, 2.4, 1.6, 1.3, 1.1, 1, 1.1, 1.3, 1.6, 2.4, 5.6],
-          16: [13, 4.4, 2.4, 1.8, 1.5, 1.2, 1.1, 1, 1, 1.1, 1.2, 1.5, 1.8, 2.4, 4.4, 13, 13]
+          10: [5.6, 2.4, 1.6, 1.3, 1.1, 1, 1.1, 1.3, 1.6, 2.4, 5.6]
         },
         medium: {
           10: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
@@ -323,11 +306,33 @@
       }
 
       function getRows() {
-        if (rowsSelect) {
-          var v = parseInt(rowsSelect.value, 10);
-          if (!isNaN(v) && v > 1) return v;
+        var value = rowsSelect ? parseInt(rowsSelect.value, 10) : 10;
+        if (isNaN(value) || value < 10) value = 10;
+        if (value > 16) value = 16;
+        return value;
+      }
+
+      // fallback-генерация множителей для любого количества слотов
+      function defaultForRisk(risk, slotsCount) {
+        var arr = [];
+        var edge, center;
+        if (risk === 'low') {
+          edge = 13;
+          center = 1;
+        } else if (risk === 'high') {
+          edge = 200;
+          center = 0.3;
+        } else {
+          edge = 60;
+          center = 0.5;
         }
-        return 10;
+        var mid = (slotsCount - 1) / 2;
+        for (var i = 0; i < slotsCount; i++) {
+          var dist = Math.abs(i - mid) / mid;
+          var val = center + (edge - center) * Math.pow(dist, 2);
+          arr.push(Number(val.toFixed(1)));
+        }
+        return arr;
       }
 
       function getMultipliers(risk, rows) {
@@ -336,15 +341,24 @@
         if (Array.isArray(arr) && arr.length === rows + 1) {
           return arr.slice();
         }
-        return defaultMultipliers(rows + 1);
+        return defaultForRisk(risk, rows + 1);
       }
 
-      function updateMultipliersUI(risk, rows) {
-        var mults = getMultipliers(risk, rows);
+      // мультипликаторы в «кубиках» под доской
+      function updateMultipliersUI(risk, rows, multipliers) {
         multipliersRow.innerHTML = '';
-        var text = 'Multipliers (' + risk + ' risk, ' + rows + ' rows): ' +
-          mults.map(function (m) { return 'x' + m; }).join(' • ');
-        multipliersRow.textContent = text;
+        for (var i = 0; i < multipliers.length; i++) {
+          var m = multipliers[i];
+          var span = document.createElement('span');
+          span.className = 'multiplier-chip';
+          if (i === 0 || i === multipliers.length - 1) {
+            span.className += ' edge';
+          } else if (i === Math.floor(multipliers.length / 2)) {
+            span.className += ' center';
+          }
+          span.textContent = 'x' + m;
+          multipliersRow.appendChild(span);
+        }
       }
 
       function updateRowsLabel(rows) {
@@ -357,12 +371,18 @@
         var mults = getMultipliers(risk, rows);
 
         if (engine) engine.stop();
-        engine = new global.PlinkoEngine(canvas, { rows: rows, multipliers: mults });
+        engine = new global.PlinkoEngine(canvas, {
+          rows: rows,
+          multipliers: mults
+        });
         engine.start();
 
-        updateMultipliersUI(risk, rows);
+        updateMultipliersUI(risk, rows, mults);
         updateRowsLabel(rows);
-        setResult('Risk: ' + risk + '. Rows: ' + rows + '. Press "Drop ball" to play.', 'neutral');
+        setResult(
+          'Risk: ' + risk + ', rows: ' + rows + '. Press "Drop ball" to play.',
+          'neutral'
+        );
       }
 
       function stopAuto() {
@@ -423,23 +443,23 @@
           if (win > bet) {
             setResult(
               'Risk: ' + risk + ', rows: ' + rows +
-              '. Slot x' + multiplier.toFixed(2) +
-              '. You won ' + win.toFixed(2) + ' virtual credits.',
+                '. Slot x' + multiplier.toFixed(2) +
+                '. You won ' + win.toFixed(2) + ' virtual credits.',
               'win'
             );
           } else if (win === bet) {
             setResult(
               'Risk: ' + risk + ', rows: ' + rows +
-              '. Slot x' + multiplier.toFixed(2) +
-              '. You got your bet back (' + win.toFixed(2) + ').',
+                '. Slot x' + multiplier.toFixed(2) +
+                '. You got your bet back (' + win.toFixed(2) + ').',
               'neutral'
             );
           } else {
             setResult(
               'Risk: ' + risk + ', rows: ' + rows +
-              '. Slot x' + multiplier.toFixed(2) +
-              '. You receive ' + win.toFixed(2) +
-              ' back from ' + bet.toFixed(2) + '.',
+                '. Slot x' + multiplier.toFixed(2) +
+                '. You receive ' + win.toFixed(2) +
+                ' back from ' + bet.toFixed(2) + '.',
               'lose'
             );
           }
@@ -453,7 +473,6 @@
         });
       }
 
-      // Привязка событий
       balanceEl.textContent = balance.toFixed(2);
 
       dropBtn.addEventListener('click', function () {
@@ -475,7 +494,6 @@
       riskSelect.addEventListener('change', refreshEngine);
       if (rowsSelect) rowsSelect.addEventListener('change', refreshEngine);
 
-      // Первый запуск
       refreshEngine();
     });
   }
