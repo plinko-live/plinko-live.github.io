@@ -199,7 +199,7 @@
     var randomOffset = (Math.random() - 0.5) * slotWidth * 0.7;
     var startX = PlinkoEngine.WIDTH / 2 + randomOffset;
     var startY = 20;
-    var radius = 10;
+    var radius = 6;
 
     this.ball = Bodies.circle(startX, startY, radius, {
       restitution: 0.6,
