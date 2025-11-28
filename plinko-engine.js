@@ -1,18 +1,5 @@
 // plinko-engine.js
-// Vanilla JavaScript Plinko engine based on the Svelte/Matter.js version
-// Simplified to run directly in the browser with Matter.js and a single <canvas>.
-//
-// Usage in HTML:
-// <canvas id="plinkoCanvas" width="600" height="420"></canvas>
-// <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
-// <script src="plinko-engine.js"></script>
-// <script>
-//   const engine = new PlinkoEngine(document.getElementById('plinkoCanvas'), {
-//     rows: 10,
-//     multipliers: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22]
-//   });
-//   engine.start();
-// </script>
+// Vanilla JS Plinko + UI. Основано на Matter.js.
 
 (function (global) {
   'use strict';
@@ -23,10 +10,6 @@
     console.warn('[PlinkoEngine] Matter.js not found. Include matter.min.js before this file.');
   }
 
-  /**
-   * Simple Plinko engine: builds a triangular peg grid and bottom buckets,
-   * drops a ball from the top and reports in which slot it landed.
-   */
   class PlinkoEngine {
     static WIDTH = 600;
     static HEIGHT = 420;
@@ -34,8 +17,8 @@
     /**
      * @param {HTMLCanvasElement} canvas
      * @param {Object} [options]
-     * @param {number} [options.rows=10] - number of peg rows
-     * @param {number[]} [options.multipliers] - optional multipliers for buckets
+     * @param {number} [options.rows=10]
+     * @param {number[]} [options.multipliers]
      */
     constructor(canvas, options = {}) {
       if (!canvas) throw new Error('PlinkoEngine requires a canvas element');
@@ -49,18 +32,15 @@
           ? options.multipliers
           : this.#defaultMultipliers(this.slotsCount);
 
-      // Matter.js core
       this.engine = Engine.create({ gravity: { x: 0, y: 1 } });
       this.world = this.engine.world;
       this.runner = Runner.create();
       this.render = null;
 
-      // Scene objects
       this.pegs = [];
       this.buckets = [];
       this.ball = null;
 
-      // State
       this.isRunning = false;
       this.isDropping = false;
       this.onResultCallback = null;
@@ -68,7 +48,6 @@
       this.#setupScene();
     }
 
-    /** Default symmetric multipliers if none are provided */
     #defaultMultipliers(count) {
       const mid = (count - 1) / 2;
       const arr = [];
@@ -80,20 +59,17 @@
       return arr;
     }
 
-    /** Build walls, pegs and buckets */
     #setupScene() {
       const W = PlinkoEngine.WIDTH;
       const H = PlinkoEngine.HEIGHT;
       const wallThickness = 40;
 
-      // Static walls
       const leftWall = Bodies.rectangle(-wallThickness / 2, H / 2, wallThickness, H, { isStatic: true });
       const rightWall = Bodies.rectangle(W + wallThickness / 2, H / 2, wallThickness, H, { isStatic: true });
       const floor = Bodies.rectangle(W / 2, H + wallThickness / 2, W, wallThickness, { isStatic: true });
 
       Composite.add(this.world, [leftWall, rightWall, floor]);
 
-      // Peg grid
       const topOffsetY = 40;
       const bottomOffsetY = 90;
       const usableHeight = H - topOffsetY - bottomOffsetY;
@@ -117,7 +93,6 @@
 
       Composite.add(this.world, this.pegs);
 
-      // Buckets at the bottom (визуальные, логика по finish line)
       const bucketsY = H - 40;
       const slotWidth = W / this.slotsCount;
       const bucketHeight = 50;
@@ -139,7 +114,7 @@
 
       Composite.add(this.world, this.buckets);
 
-      // Линия завершения: когда шар почти у пола, считаем, что он попал в слот
+      // Линия завершения раунда — чуть выше пола
       const finishLineY = H - 10;
 
       Events.on(this.engine, 'afterUpdate', () => {
@@ -151,7 +126,6 @@
       });
     }
 
-    /** Start rendering loop */
     start() {
       if (this.isRunning) return;
       this.isRunning = true;
@@ -172,7 +146,6 @@
       Runner.run(this.runner, this.engine);
     }
 
-    /** Stop rendering loop and clear scene */
     stop() {
       if (!this.isRunning) return;
       this.isRunning = false;
@@ -188,7 +161,6 @@
       this.#clearBall();
     }
 
-    /** Drop a new ball. Callback receives { slotIndex, multiplier } */
     dropBall(onResult) {
       if (this.isDropping) return;
       this.onResultCallback = typeof onResult === 'function' ? onResult : null;
@@ -210,7 +182,6 @@
       this.isDropping = true;
     }
 
-    /** Remove current ball from the world */
     #clearBall() {
       if (this.ball) {
         Composite.remove(this.world, this.ball);
@@ -219,7 +190,6 @@
       this.isDropping = false;
     }
 
-    /** Compute final slot, call callback and reset dropping state */
     #finishDrop() {
       if (!this.ball) return;
 
@@ -241,4 +211,195 @@
   }
 
   global.PlinkoEngine = PlinkoEngine;
+
+  // === UI-демо: привязка к текущей странице ===
+  if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function () {
+      const ROWS = 10;
+      const RISK_MULTIPLIERS = {
+        low:    [8.9, 3, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 3, 8.9],
+        medium: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22],
+        high:   [76, 10, 3, 0.9, 0.3, 0.2, 0.3, 0.9, 3, 10, 76]
+      };
+
+      let balance = 1000;
+      let autoMode = false;
+      let isDropping = false;
+
+      const canvas         = document.getElementById('plinkoCanvas');
+      const betInput       = document.getElementById('bet');
+      const riskSelect     = document.getElementById('risk');
+      const rowsLabel      = document.getElementById('rowsLabel');
+      const balanceEl      = document.getElementById('balance');
+      const dropBtn        = document.getElementById('dropBtn');
+      const autoBtn        = document.getElementById('autoBtn');
+      const resultText     = document.getElementById('resultText');
+      const multipliersRow = document.getElementById('multipliersRow');
+      const yearEl         = document.getElementById('year');
+
+      if (!canvas || !betInput || !riskSelect || !rowsLabel || !balanceEl ||
+          !dropBtn || !autoBtn || !resultText || !multipliersRow) {
+        return;
+      }
+
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
+
+      rowsLabel.textContent = ROWS.toString();
+      balanceEl.textContent = balance.toFixed(2);
+
+      function setResult(msg, type) {
+        resultText.textContent = msg;
+        if (type === 'win') {
+          resultText.style.color = '#4ade80';
+        } else if (type === 'lose') {
+          resultText.style.color = '#f97373';
+        } else {
+          resultText.style.color = '#9ca3af';
+        }
+      }
+
+      function updateMultipliersUI(risk) {
+        const multipliers = RISK_MULTIPLIERS[risk] || RISK_MULTIPLIERS.medium;
+        multipliersRow.innerHTML = '';
+
+        multipliers.forEach(function (m, idx) {
+          const span = document.createElement('span');
+          span.textContent =
+            idx === 0
+              ? 'Multipliers (' + risk + ' risk): x' + m
+              : '• x' + m;
+          multipliersRow.appendChild(span);
+        });
+      }
+
+      const engine = new PlinkoEngine(canvas, {
+        rows: ROWS,
+        multipliers: RISK_MULTIPLIERS[riskSelect.value] || RISK_MULTIPLIERS.medium
+      });
+      engine.start();
+
+      function applyRisk() {
+        const risk = riskSelect.value || 'medium';
+        const multipliers = RISK_MULTIPLIERS[risk] || RISK_MULTIPLIERS.medium;
+        engine.multipliers = multipliers;
+        updateMultipliersUI(risk);
+        setResult('Risk set to ' + risk + '. Press "Drop ball" to play.', 'neutral');
+      }
+
+      applyRisk();
+
+      function stopAuto() {
+        autoMode = false;
+        autoBtn.textContent = 'Start auto';
+        autoBtn.classList.remove('auto-active');
+      }
+
+      function scheduleNextAuto() {
+        if (!autoMode) return;
+        if (balance <= 0) {
+          setResult('Auto stopped: balance is 0.', 'lose');
+          stopAuto();
+          return;
+        }
+        setTimeout(function () {
+          if (autoMode && !isDropping) {
+            dropOnce(true);
+          }
+        }, 500);
+      }
+
+      function dropOnce(fromAuto) {
+        if (isDropping) return;
+
+        const bet = parseFloat(betInput.value);
+        if (isNaN(bet) || bet <= 0) {
+          setResult('Enter a valid bet larger than 0.', 'lose');
+          if (fromAuto) stopAuto();
+          return;
+        }
+        if (bet > balance) {
+          setResult('Insufficient balance.', 'lose');
+          if (fromAuto) stopAuto();
+          return;
+        }
+
+        isDropping = true;
+        dropBtn.disabled = true;
+
+        balance -= bet;
+        balanceEl.textContent = balance.toFixed(2);
+        setResult('Ball is dropping…', 'neutral');
+
+        engine.dropBall(function (result) {
+          const multiplier = typeof result.multiplier === 'number'
+            ? result.multiplier
+            : 0;
+
+          const win = bet * multiplier;
+          balance += win;
+          balanceEl.textContent = balance.toFixed(2);
+
+          const risk = riskSelect.value || 'medium';
+
+          if (win > bet) {
+            setResult(
+              'Risk: ' + risk + '. Slot x' + multiplier.toFixed(2) +
+              '. You won ' + win.toFixed(2) + ' virtual credits.',
+              'win'
+            );
+          } else if (win === bet) {
+            setResult(
+              'Risk: ' + risk + '. Slot x' + multiplier.toFixed(2) +
+              '. You got your bet back (' + win.toFixed(2) + ').',
+              'neutral'
+            );
+          } else {
+            setResult(
+              'Risk: ' + risk + '. Slot x' + multiplier.toFixed(2) +
+              '. You receive ' + win.toFixed(2) +
+              ' back from ' + bet.toFixed(2) + '.',
+              'lose'
+            );
+          }
+
+          isDropping = false;
+          dropBtn.disabled = false;
+
+          if (autoMode) {
+            scheduleNextAuto();
+          }
+        });
+      }
+
+      function startAuto() {
+        if (autoMode) return;
+        autoMode = true;
+        autoBtn.textContent = 'Stop auto';
+        autoBtn.classList.add('auto-active');
+        dropOnce(true);
+      }
+
+      dropBtn.addEventListener('click', function () {
+        if (autoMode) return;
+        dropOnce(false);
+      });
+
+      autoBtn.addEventListener('click', function () {
+        if (!autoMode) {
+          startAuto();
+        } else {
+          stopAuto();
+        }
+      });
+
+      riskSelect.addEventListener('change', function () {
+        applyRisk();
+      });
+
+      setResult('Press "Drop ball" to start.', 'neutral');
+    });
+  }
+
 })(typeof window !== 'undefined' ? window : globalThis);
