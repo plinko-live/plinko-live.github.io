@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const ROWS = 10;          // количество рядов
   const SLOTS = ROWS + 1;   // количество слотов
-  const BALL_RADIUS = 9;
-  const AUTO_DELAY = 400;   // пауза между дропами в авто-режиме (мс)
+  const BALL_RADIUS = 11;
+  const AUTO_DELAY = 550;   // пауза между дропами в авто-режиме (мс)
 
   rowsLabel.textContent = ROWS.toString();
 
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function setResult(msg, type = "neutral") {
     resultText.textContent = msg;
     resultText.style.color =
-      type === "win" ? "#4ade80" : type === "lose" ? "#f97316" : "#9ca3af";
+      type === "win" ? "#4ade80" : type === "lose" ? "#22d3ee" : "#9ca3af";
   }
 
   // Геометрия доски (в px внутри padding)
@@ -53,10 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const boardWidth = boardEl.clientWidth;
     const boardHeight = boardEl.clientHeight;
 
-    const leftPadding = 10;
-    const rightPadding = 10;
-    const topPadding = 12;
-    const bottomPadding = 40;
+    const leftPadding = 12;
+    const rightPadding = 12;
+    const topPadding = 14;
+    const bottomPadding = 46;
 
     const innerLeft = leftPadding;
     const innerRight = boardWidth - rightPadding;
@@ -190,8 +190,8 @@ document.addEventListener("DOMContentLoaded", () => {
     resetBallInstant();
     setResult("Ball is dropping...", "neutral");
 
-    // небольшая плавность движения
-    const STEP_MS = 90;
+    // небольшая плавность движения (медленнее, чем раньше)
+    const STEP_MS = 130;
 
     // ряд от 1 до ROWS
     for (let row = 1; row <= ROWS; row++) {
@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const { x, y } = getCenterCoord(row, rights);
       ballEl.style.transition =
-        "top 0.09s ease-out, left 0.09s ease-in-out";
+        "top 0.14s ease-out, left 0.14s ease-in-out";
       ballEl.style.left = `${x - BALL_RADIUS}px`;
       ballEl.style.top = `${y - BALL_RADIUS}px`;
 
@@ -268,7 +268,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let bet = parseFloat(betInput.value);
       if (isNaN(bet) || bet <= 0 || bet > balance) {
-        setResult("Auto stopped: invalid bet or insufficient balance.", "lose");
+        setResult(
+          "Auto stopped: invalid bet or insufficient balance.",
+          "lose"
+        );
         stopAuto();
         break;
       }
