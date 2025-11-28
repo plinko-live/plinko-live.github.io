@@ -5,19 +5,22 @@
 }
 
 :root {
-  --bg: #050816;
-  --bg-alt: #0b1120;
-  --accent: #f97316;
-  --accent-soft: rgba(249, 115, 22, 0.15);
-  --text: #e5e7eb;
+  --bg: #020617;
+  --bg-alt: #02081b;
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.16);
+  --text: #e5f4ff;
   --text-muted: #9ca3af;
   --border: #1f2933;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #111827 0, var(--bg) 55%);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(circle at top, #0f172a 0, var(--bg) 55%),
+    linear-gradient(to bottom, #020617, #000000);
   color: var(--text);
   min-height: 100vh;
   display: flex;
@@ -26,7 +29,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: 960px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -35,7 +38,7 @@ body {
 
 .site-header {
   border-bottom: 1px solid var(--border);
-  background: rgba(5, 8, 22, 0.95);
+  background: rgba(3, 7, 18, 0.95);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
@@ -52,7 +55,8 @@ body {
 .logo {
   font-weight: 700;
   font-size: 20px;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .main-nav a {
@@ -71,7 +75,7 @@ body {
 
 .site-main {
   flex: 1;
-  padding: 32px 0 40px;
+  padding: 28px 0 40px;
 }
 
 .game-section {
@@ -79,17 +83,37 @@ body {
 }
 
 .game-layout {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.2fr);
+  gap: 18px;
+  align-items: flex-start;
 }
 
+@media (max-width: 900px) {
+  .game-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* GAME CARD */
+
 .game-panel {
-  background: var(--bg-alt);
-  border-radius: 16px;
+  background:
+    radial-gradient(circle at top left, #111827 0, #020617 60%),
+    linear-gradient(135deg, rgba(37, 99, 235, 0.12), transparent 50%);
+  border-radius: 18px;
   padding: 20px 16px 24px;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.8);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
   width: 100%;
-  max-width: 520px;
+}
+
+.kicker {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
 }
 
 .game-title {
@@ -147,13 +171,17 @@ body {
   cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease,
-    background 0.12s ease, color 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #f97316, #fb923c);
-  color: #111827;
+  background: linear-gradient(135deg, #22d3ee, #38bdf8);
+  color: #020617;
 }
 
 .btn-primary:disabled,
@@ -166,7 +194,7 @@ body {
 .btn-primary:not(:disabled):hover,
 .btn-secondary:not(:disabled):hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.7);
 }
 
 .btn-secondary {
@@ -187,19 +215,21 @@ body {
   min-height: 20px;
 }
 
-/* BOARD */
+/* BOARD — увеличенное окно */
 
 .plinko-board {
   position: relative;
   margin: 8px 0 10px;
   width: 100%;
-  max-width: 360px;
-  height: 260px;
+  max-width: 440px;
+  height: 320px;
   margin-left: auto;
   margin-right: auto;
-  border-radius: 16px;
-  padding: 12px 10px 40px;
-  background: radial-gradient(circle at top, #111827 0, #020617 60%);
+  border-radius: 18px;
+  padding: 14px 12px 46px;
+  background:
+    radial-gradient(circle at top, #1f2937 0, #020617 65%),
+    radial-gradient(circle at bottom, #0f172a 0, #020617 70%);
   border: 1px solid var(--border);
   overflow: hidden;
 }
@@ -207,7 +237,7 @@ body {
 /* слой пинов */
 .pegs-layer {
   position: absolute;
-  inset: 16px 10px 60px 10px;
+  inset: 18px 12px 68px 12px;
   pointer-events: none;
 }
 
@@ -216,17 +246,17 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: rgba(248, 250, 252, 0.28);
-  box-shadow: 0 0 4px rgba(15, 23, 42, 0.8);
+  background: rgba(226, 232, 240, 0.35);
+  box-shadow: 0 0 4px rgba(15, 23, 42, 0.9);
 }
 
 /* слоты */
 
 .slots-row {
   position: absolute;
-  bottom: 8px;
-  left: 10px;
-  right: 10px;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
   display: flex;
   justify-content: space-between;
   gap: 4px;
@@ -234,9 +264,9 @@ body {
 
 .slot {
   flex: 1;
-  height: 32px;
+  height: 34px;
   border-radius: 12px 12px 6px 6px;
-  background: rgba(15, 23, 42, 0.9);
+  background: rgba(15, 23, 42, 0.96);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -251,9 +281,13 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(249, 115, 22, 0.12), transparent);
+  background: linear-gradient(
+    to top,
+    rgba(34, 211, 238, 0.16),
+    transparent
+  );
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.22s ease;
 }
 
 .slot.active::before {
@@ -264,16 +298,18 @@ body {
   border-color: var(--accent);
 }
 
-/* шарик */
+/* шарик — немного больше */
 
 .ball {
   position: absolute;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
-  background: radial-gradient(circle at 30% 30%, #fef3c7, #f97316);
-  box-shadow: 0 0 10px rgba(249, 115, 22, 0.8);
-  top: -24px;
+  background: radial-gradient(circle at 30% 30%, #e0f2fe, #22d3ee);
+  box-shadow:
+    0 0 10px rgba(34, 211, 238, 0.8),
+    0 0 20px rgba(59, 130, 246, 0.6);
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
 }
@@ -287,6 +323,66 @@ body {
   gap: 6px;
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* SIDE PANEL */
+
+.game-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.info-card {
+  background:
+    radial-gradient(circle at top left, #02081b 0, #020617 70%),
+    linear-gradient(135deg, rgba(34, 211, 238, 0.14), transparent 55%);
+  border-radius: 16px;
+  padding: 12px 14px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.info-card h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.info-card h3 {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+
+.info-card p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0;
+}
+
+.info-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 4px 0 6px;
+}
+
+.info-card li {
+  padding-left: 14px;
+  position: relative;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.info-card li::before {
+  content: "•";
+  position: absolute;
+  left: 3px;
+  color: var(--accent);
+}
+
+.info-disclaimer {
+  font-size: 12px;
+  color: var(--accent);
 }
 
 /* INFO SECTION */
@@ -306,10 +402,54 @@ body {
   margin: 4px 0;
 }
 
+.info-section ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 4px 0 8px;
+}
+
+.info-section ul li {
+  padding-left: 16px;
+  position: relative;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+}
+
+.info-section ul li::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
+  color: var(--accent);
+}
+
+.info-section ol {
+  padding-left: 18px;
+  margin: 4px 0 8px;
+  color: var(--text-muted);
+}
+
 .info-section .disclaimer {
   font-size: 12px;
-  color: #f97316;
+  color: var(--accent);
   margin-top: 8px;
+}
+
+/* FAQ */
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.faq-item h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.faq-item p {
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
 /* FOOTER */
@@ -327,21 +467,6 @@ body {
   justify-content: space-between;
   gap: 8px;
 }
-.faq-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.faq-item h3 {
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-.faq-item p {
-  font-size: 14px;
-  color: var(--text-muted);
-}
 
 /* RESPONSIVE */
 
@@ -357,7 +482,7 @@ body {
 
   .plinko-board {
     max-width: 100%;
-    height: 240px;
+    height: 280px;
   }
 
   .footer-inner {
