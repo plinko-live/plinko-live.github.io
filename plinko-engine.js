@@ -106,6 +106,8 @@
     var bucketsY = H - 40;
     var slotWidth = W / this.slotsCount;
     var bucketHeight = 60;
+    this.slotWidth = slotWidth;
+    this.bucketHeight = bucketHeight;
     var bucket, bx;
 
     for (var i = 0; i < this.slotsCount; i++) {
@@ -153,24 +155,52 @@
   };
 
   PlinkoEngine.prototype.start = function () {
-    if (this.isRunning) return;
-    this.isRunning = true;
+  if (this.isRunning) return;
+  this.isRunning = true;
 
-    this.render = Render.create({
-      canvas: this.canvas,
-      engine: this.engine,
-      options: {
-        width: PlinkoEngine.WIDTH,
-        height: PlinkoEngine.HEIGHT,
-        background: 'transparent',
-        wireframes: false,
-        pixelRatio: global.devicePixelRatio || 1
-      }
-    });
+  this.render = Render.create({
+    canvas: this.canvas,
+    engine: this.engine,
+    options: {
+      width: PlinkoEngine.WIDTH,
+      height: PlinkoEngine.HEIGHT,
+      background: 'transparent',
+      wireframes: false,
+      pixelRatio: global.devicePixelRatio || 1
+    }
+  });
 
-    Render.run(this.render);
-    Runner.run(this.runner, this.engine);
-  };
+  Render.run(this.render);
+  Runner.run(this.runner, this.engine);
+
+  // подписи мультипликаторов прямо в слотах
+  var self = this;
+  Matter.Events.on(this.render, 'afterRender', function () {
+    if (!self.render) return;
+    var ctx = self.render.context;
+    if (!ctx) return;
+
+    ctx.save();
+    ctx.font = '12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (var i = 0; i < self.buckets.length; i++) {
+      var bucket = self.buckets[i];
+      var m = self.multipliers[i];
+      if (m == null) continue;
+
+      var pos = bucket.position;
+
+      // цвет можно усложнить, но пока просто читаемый
+      ctx.fillStyle = '#e5e7eb';
+      ctx.fillText('x' + m, pos.x, pos.y);
+    }
+
+    ctx.restore();
+  });
+};
+
 
   PlinkoEngine.prototype.stop = function () {
     if (!this.isRunning) return;
@@ -199,7 +229,10 @@
     var randomOffset = (Math.random() - 0.5) * slotWidth * 0.7;
     var startX = PlinkoEngine.WIDTH / 2 + randomOffset;
     var startY = 20;
-    var radius = 6;
+    // чем больше рядов, тем меньше шарик: 10 рядов ≈ 8px, 16 рядов ≈ 5px
+    var radius = 8 - (this.rows - 10) * 0.5;
+    if (radius < 4) radius = 4;
+
 
     this.ball = Bodies.circle(startX, startY, radius, {
       restitution: 0.6,
@@ -346,19 +379,9 @@
 
       // мультипликаторы в «кубиках» под доской
       function updateMultipliersUI(risk, rows, multipliers) {
-        multipliersRow.innerHTML = '';
-        for (var i = 0; i < multipliers.length; i++) {
-          var m = multipliers[i];
-          var span = document.createElement('span');
-          span.className = 'multiplier-chip';
-          if (i === 0 || i === multipliers.length - 1) {
-            span.className += ' edge';
-          } else if (i === Math.floor(multipliers.length / 2)) {
-            span.className += ' center';
-          }
-          span.textContent = 'x' + m;
-          multipliersRow.appendChild(span);
-        }
+        multipliersRow.textContent =
+          'Multipliers (' + risk + ' risk, ' + rows + ' rows): ' +
+          multipliers.map(function (m) { return 'x' + m; }).join(' · ');
       }
 
       function updateRowsLabel(rows) {
