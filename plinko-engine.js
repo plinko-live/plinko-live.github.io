@@ -1,42 +1,26 @@
 // plinko-engine.js
 // Vanilla JavaScript Plinko engine based on the Svelte/Matter.js version
-// from the original repository, but simplified to work directly in the
-// browser without Svelte or external stores.
+// Simplified to run directly in the browser with Matter.js and a single <canvas>.
 //
 // Usage in HTML:
-// <canvas id="plinko-canvas" width="420" height="530"></canvas>
+// <canvas id="plinkoCanvas" width="600" height="420"></canvas>
 // <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
 // <script src="plinko-engine.js"></script>
 // <script>
-//   const canvas = document.getElementById('plinko-canvas');
-//   const engine = new PlinkoEngine(canvas, {
-//     rows: 12,
-//     multipliers: [9, 4, 2, 1.2, 0.5, 0.3, 0.5, 1.2, 2, 4, 9]
+//   const engine = new PlinkoEngine(document.getElementById('plinkoCanvas'), {
+//     rows: 10,
+//     multipliers: [22, 5, 2, 1.4, 0.6, 0.4, 0.6, 1.4, 2, 5, 22]
 //   });
 //   engine.start();
-//   document.getElementById('dropButton').addEventListener('click', () => {
-//     engine.dropBall((result) => {
-//       // result.slotIndex, result.multiplier, result.path
-//       console.log('Result:', result);
-//     });
-//   });
 // </script>
 
 (function (global) {
   'use strict';
 
-  const {
-    Engine,
-    Render,
-    Runner,
-    Composite,
-    Bodies,
-    Body,
-    Events
-  } = global.Matter || {};
+  const { Engine, Render, Runner, Composite, Bodies, Events } = global.Matter || {};
 
   if (!Engine || !Render) {
-    console.warn('[PlinkoEngine] Matter.js not found. Please include matter.min.js before this file.');
+    console.warn('[PlinkoEngine] Matter.js not found. Include matter.min.js before this file.');
   }
 
   /**
@@ -44,8 +28,8 @@
    * drops a ball from the top and reports in which slot it landed.
    */
   class PlinkoEngine {
-    static WIDTH = 420;
-    static HEIGHT = 530;
+    static WIDTH = 600;
+    static HEIGHT = 420;
 
     /**
      * @param {HTMLCanvasElement} canvas
@@ -60,14 +44,13 @@
       this.canvas = canvas;
       this.rows = options.rows || 10;
       this.slotsCount = this.rows + 1;
-      this.multipliers = Array.isArray(options.multipliers) && options.multipliers.length === this.slotsCount
-        ? options.multipliers
-        : this.#defaultMultipliers(this.slotsCount);
+      this.multipliers =
+        Array.isArray(options.multipliers) && options.multipliers.length === this.slotsCount
+          ? options.multipliers
+          : this.#defaultMultipliers(this.slotsCount);
 
       // Matter.js core
-      this.engine = Engine.create({
-        gravity: { x: 0, y: 1 }
-      });
+      this.engine = Engine.create({ gravity: { x: 0, y: 1 } });
       this.world = this.engine.world;
       this.runner = Runner.create();
       this.render = null;
@@ -87,7 +70,6 @@
 
     /** Default symmetric multipliers if none are provided */
     #defaultMultipliers(count) {
-      // Simple symmetric profile: low in center, higher on edges
       const mid = (count - 1) / 2;
       const arr = [];
       for (let i = 0; i < count; i++) {
@@ -112,8 +94,8 @@
       Composite.add(this.world, [leftWall, rightWall, floor]);
 
       // Peg grid
-      const topOffsetY = 80;
-      const bottomOffsetY = 130;
+      const topOffsetY = 40;
+      const bottomOffsetY = 90;
       const usableHeight = H - topOffsetY - bottomOffsetY;
       const rowSpacing = usableHeight / this.rows;
       const pegRadius = 4;
@@ -135,10 +117,10 @@
 
       Composite.add(this.world, this.pegs);
 
-      // Buckets at the bottom
+      // Buckets at the bottom (визуальные, логика по finish line)
       const bucketsY = H - 40;
       const slotWidth = W / this.slotsCount;
-      const bucketHeight = 60;
+      const bucketHeight = 50;
 
       for (let i = 0; i < this.slotsCount; i++) {
         const x = slotWidth * (i + 0.5);
@@ -157,13 +139,13 @@
 
       Composite.add(this.world, this.buckets);
 
-      // Collision / update logic: check when ball falls below bucket line
-      const finishLineY = H - 10; // чуть выше пола
+      // Линия завершения: когда шар почти у пола, считаем, что он попал в слот
+      const finishLineY = H - 10;
+
       Events.on(this.engine, 'afterUpdate', () => {
         if (!this.ball || !this.isDropping) return;
-
         const y = this.ball.position.y;
-        if (y >= bucketsY - bucketHeight / 2) {
+        if (y >= finishLineY) {
           this.#finishDrop();
         }
       });
@@ -198,14 +180,15 @@
       Runner.stop(this.runner);
       if (this.render) {
         Render.stop(this.render);
-        // Do not remove canvas, only clear context
         const ctx = this.render.context;
-        ctx && ctx.clearRect(0, 0, PlinkoEngine.WIDTH, PlinkoEngine.HEIGHT);
+        if (ctx) {
+          ctx.clearRect(0, 0, PlinkoEngine.WIDTH, PlinkoEngine.HEIGHT);
+        }
       }
       this.#clearBall();
     }
 
-    /** Drop a new ball. Callback receives { slotIndex, multiplier, path } */
+    /** Drop a new ball. Callback receives { slotIndex, multiplier } */
     dropBall(onResult) {
       if (this.isDropping) return;
       this.onResultCallback = typeof onResult === 'function' ? onResult : null;
@@ -213,7 +196,7 @@
       this.#clearBall();
 
       const startX = PlinkoEngine.WIDTH / 2;
-      const startY = 40;
+      const startY = 30;
       const radius = 10;
 
       this.ball = Bodies.circle(startX, startY, radius, {
@@ -221,19 +204,6 @@
         friction: 0.02,
         frictionAir: 0.005,
         render: { fillStyle: '#22D3EE' }
-      });
-
-      this.ball._path = [{ x: startX, y: startY }];
-
-      // Track path (optional useful for debugging/visualization)
-      Events.on(this.engine, 'afterUpdate', () => {
-        if (this.ball && this.isDropping) {
-          const p = this.ball.position;
-          const path = this.ball._path;
-          if (!path.length || (Math.abs(path[path.length - 1].x - p.x) > 1 || Math.abs(path[path.length - 1].y - p.y) > 1)) {
-            path.push({ x: p.x, y: p.y });
-          }
-        }
       });
 
       Composite.add(this.world, this.ball);
@@ -260,13 +230,7 @@
       if (slotIndex >= this.slotsCount) slotIndex = this.slotsCount - 1;
 
       const multiplier = this.multipliers[slotIndex];
-      const path = this.ball._path || [];
-
-      const payload = {
-        slotIndex,
-        multiplier,
-        path
-      };
+      const payload = { slotIndex, multiplier };
 
       this.#clearBall();
 
