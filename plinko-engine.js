@@ -114,17 +114,23 @@
 
       Composite.add(this.world, this.buckets);
 
-      // Линия завершения раунда — чуть выше пола
-      const finishLineY = H - 10;
+      // Линия завершения: считаем раунд оконченным,
+      // когда шар в секторе и почти перестал падать
+      const finishLineY = bucketsY - bucketHeight / 2 + 10; // немного ниже верхней границы слотов
 
       Events.on(this.engine, 'afterUpdate', () => {
         if (!this.ball || !this.isDropping) return;
-        const y = this.ball.position.y;
-        if (y >= finishLineY) {
+
+        const y  = this.ball.position.y;
+        const vy = this.ball.velocity.y;
+
+        // шар опустился в зону слотов и почти не двигается по Y
+        if (y >= finishLineY && Math.abs(vy) < 0.2) {
           this.#finishDrop();
         }
       });
     }
+
 
     start() {
       if (this.isRunning) return;
